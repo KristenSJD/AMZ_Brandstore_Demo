@@ -1,0 +1,1607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amazon Content Simulator — Vinamit</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --amz-orange: #FF9900;
+    --amz-dark: #131921;
+    --amz-mid: #232F3E;
+    --amz-blue: #146EB4;
+    --amz-light: #EAEDED;
+    --amz-text: #0F1111;
+    --green: #007600;
+    --panel-bg: #f8f8f8;
+    --border: #ddd;
+    --radius: 6px;
+    --vinamit-green: #2D6A2D;
+    --vinamit-yellow: #F5C800;
+    --vinamit-orange: #E8732A;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: #e8e8e8;
+    color: var(--amz-text);
+    min-height: 100vh;
+  }
+
+  /* ===== TOP BAR ===== */
+  .topbar {
+    background: var(--amz-dark);
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 16px;
+    font-size: 13px;
+    border-bottom: 3px solid var(--amz-orange);
+  }
+  .topbar-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    color: var(--amz-orange);
+    letter-spacing: -0.5px;
+  }
+  .topbar-logo span { color: white; font-size: 11px; font-family: 'Nunito', sans-serif; font-weight: 600; }
+  .topbar-tabs {
+    display: flex; gap: 4px; margin-left: auto;
+  }
+  .tab-btn {
+    padding: 5px 14px;
+    border-radius: 4px;
+    border: none;
+    background: transparent;
+    color: #ccc;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: 'Nunito', sans-serif;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .tab-btn.active { background: var(--amz-orange); color: #000; }
+  .tab-btn:hover:not(.active) { background: rgba(255,255,255,0.1); color: white; }
+
+  /* ===== MAIN LAYOUT ===== */
+  .main-layout {
+    display: flex;
+    height: calc(100vh - 49px);
+  }
+
+  /* ===== LEFT PANEL ===== */
+  .left-panel {
+    width: 280px;
+    min-width: 240px;
+    background: white;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .panel-header {
+    background: var(--amz-mid);
+    color: white;
+    padding: 10px 14px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  /* Module library */
+  .module-library {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px;
+  }
+  .module-section-title {
+    font-size: 10px;
+    font-weight: 900;
+    color: #888;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin: 8px 4px 6px;
+  }
+  .module-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border: 1.5px solid var(--border);
+    border-radius: 5px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    background: white;
+    transition: all 0.15s;
+  }
+  .module-card:hover { border-color: var(--amz-orange); background: #fff8ee; }
+  .module-card.active { border-color: var(--amz-orange); background: #fff3d4; }
+  .module-icon {
+    width: 38px; height: 28px;
+    background: var(--amz-light);
+    border-radius: 3px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .module-info { flex: 1; min-width: 0; }
+  .module-name { font-size: 12px; font-weight: 800; color: #111; }
+  .module-dim { font-size: 10px; color: #888; }
+  .add-btn {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--amz-orange);
+    border: none;
+    color: white;
+    font-size: 16px;
+    font-weight: 900;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: transform 0.1s;
+  }
+  .add-btn:hover { transform: scale(1.1); }
+
+  /* ===== CENTER CANVAS ===== */
+  .canvas-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #d5d5d5;
+  }
+  .canvas-toolbar {
+    background: white;
+    border-bottom: 1px solid var(--border);
+    padding: 7px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .view-toggle {
+    display: flex;
+    border: 1.5px solid var(--border);
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  .view-btn {
+    padding: 4px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: 'Nunito', sans-serif;
+    border: none;
+    background: white;
+    cursor: pointer;
+    color: #555;
+    transition: all 0.15s;
+  }
+  .view-btn.active { background: var(--amz-mid); color: white; }
+  .toolbar-divider { width: 1px; height: 20px; background: var(--border); }
+  .toolbar-label { font-size: 11px; font-weight: 800; color: #888; letter-spacing: 0.3px; }
+  .canvas-hint {
+    margin-left: auto;
+    font-size: 11px;
+    color: #aaa;
+    font-style: italic;
+  }
+
+  .preview-split {
+    flex: 1;
+    display: flex;
+    gap: 0;
+    overflow: hidden;
+  }
+
+  /* Desktop preview */
+  .preview-desktop {
+    flex: 1;
+    overflow-y: auto;
+    background: white;
+    border-right: 2px solid #ccc;
+  }
+  .preview-mobile-wrap {
+    width: 420px;
+    flex-shrink: 0;
+    background: #d5d5d5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 0;
+    overflow-y: auto;
+  }
+  .mobile-frame {
+    width: 375px;
+    background: white;
+    border-radius: 0;
+    border: 3px solid #333;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+  }
+  .mobile-notch {
+    background: #333;
+    height: 28px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .mobile-notch-bar {
+    width: 80px; height: 6px;
+    background: #555;
+    border-radius: 3px;
+  }
+  .mobile-content {
+    overflow-y: auto;
+    max-height: 600px;
+  }
+  .preview-label {
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #888;
+    text-align: center;
+    padding: 6px 0 4px;
+  }
+
+  /* Amazon listing chrome */
+  .amz-header {
+    background: var(--amz-dark);
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .amz-logo { color: var(--amz-orange); font-family: 'Playfair Display', serif; font-size: 18px; }
+  .amz-search {
+    flex: 1; height: 30px; border-radius: 4px;
+    background: white; border: none;
+    font-size: 12px; padding: 0 10px;
+    font-family: 'Nunito', sans-serif;
+    color: #666;
+  }
+  .amz-cart { color: white; font-size: 20px; cursor: pointer; }
+
+  .amz-breadcrumb {
+    background: var(--amz-light);
+    font-size: 11px;
+    padding: 5px 16px;
+    color: var(--amz-blue);
+  }
+
+  /* Product listing top */
+  .listing-top {
+    display: flex;
+    gap: 16px;
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .listing-img-box {
+    width: 280px; height: 280px;
+    background: var(--amz-light);
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+    position: relative;
+    cursor: pointer;
+  }
+  .listing-img-box img { width: 100%; height: 100%; object-fit: cover; }
+  .listing-img-placeholder { font-size: 40px; color: #bbb; }
+  .listing-img-upload-hint {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(0,0,0,0.6);
+    color: white;
+    font-size: 10px;
+    text-align: center;
+    padding: 5px;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .listing-img-box:hover .listing-img-upload-hint { opacity: 1; }
+
+  .listing-info { flex: 1; }
+  .listing-brand { color: var(--amz-blue); font-size: 12px; font-weight: 700; margin-bottom: 4px; }
+  .listing-title { font-size: 18px; font-weight: 700; line-height: 1.3; margin-bottom: 8px; }
+  .listing-rating { display: flex; align-items: center; gap: 6px; font-size: 13px; margin-bottom: 8px; }
+  .stars { color: var(--amz-orange); }
+  .listing-price { font-size: 26px; font-weight: 900; color: #B12704; margin-bottom: 6px; }
+  .listing-prime { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--amz-blue); margin-bottom: 10px; }
+  .buy-btn {
+    display: block;
+    background: var(--amz-orange);
+    border: none; border-radius: 20px;
+    padding: 8px 20px;
+    font-size: 13px; font-weight: 700;
+    cursor: pointer; width: fit-content;
+    font-family: 'Nunito', sans-serif;
+    margin-bottom: 6px;
+  }
+  .cart-btn {
+    display: block;
+    background: #FFD814;
+    border: none; border-radius: 20px;
+    padding: 8px 20px;
+    font-size: 13px; font-weight: 700;
+    cursor: pointer; width: fit-content;
+    font-family: 'Nunito', sans-serif;
+  }
+
+  /* ===== CANVAS MODULES ===== */
+  .canvas-modules {
+    padding: 0;
+  }
+
+  .canvas-module {
+    position: relative;
+    border: 2px solid transparent;
+    transition: border-color 0.15s;
+  }
+  .canvas-module:hover { border-color: var(--amz-orange); }
+  .canvas-module.selected { border-color: #146EB4; }
+
+  .module-controls {
+    position: absolute;
+    top: 4px; right: 4px;
+    display: flex; gap: 4px;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .canvas-module:hover .module-controls,
+  .canvas-module.selected .module-controls { opacity: 1; }
+  .ctrl-btn {
+    width: 24px; height: 24px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Nunito', sans-serif;
+  }
+  .ctrl-up { background: var(--amz-mid); color: white; }
+  .ctrl-down { background: var(--amz-mid); color: white; }
+  .ctrl-del { background: #c00; color: white; }
+  .module-type-badge {
+    position: absolute;
+    top: 4px; left: 4px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    font-size: 9px;
+    font-weight: 900;
+    padding: 2px 6px;
+    border-radius: 3px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .canvas-module:hover .module-type-badge { opacity: 1; }
+
+  /* ===== MODULE RENDERERS ===== */
+
+  /* Brand Story */
+  .mod-brand-story {
+    background: linear-gradient(135deg, var(--vinamit-green) 0%, #1a3d1a 100%);
+    padding: 40px 60px;
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    min-height: 200px;
+  }
+  .mod-brand-story .brand-text { flex: 1; color: white; }
+  .mod-brand-story .brand-text h2 { font-family: 'Playfair Display', serif; font-size: 28px; margin-bottom: 12px; line-height: 1.2; }
+  .mod-brand-story .brand-text p { font-size: 14px; line-height: 1.6; opacity: 0.9; }
+  .mod-brand-story .brand-img-slot {
+    width: 200px; height: 130px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px dashed rgba(255,255,255,0.4);
+    position: relative;
+  }
+  .mod-brand-story .brand-img-slot img { width: 100%; height: 100%; object-fit: cover; }
+
+  /* Full Banner */
+  .mod-full-banner {
+    width: 100%;
+    height: 300px;
+    background: linear-gradient(120deg, #2D6A2D, #5a9e2f);
+    position: relative;
+    overflow: hidden;
+    display: flex; align-items: center;
+    cursor: pointer;
+  }
+  .mod-full-banner .banner-img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+  }
+  .mod-full-banner .banner-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, rgba(0,0,0,0.55) 0%, transparent 60%);
+  }
+  .mod-full-banner .banner-content {
+    position: relative; z-index: 2;
+    padding: 0 50px;
+    color: white;
+  }
+  .mod-full-banner .banner-content h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px; line-height: 1.15; margin-bottom: 10px;
+  }
+  .mod-full-banner .banner-content p { font-size: 15px; opacity: 0.9; max-width: 320px; }
+  .upload-overlay {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 13px; font-weight: 700;
+    opacity: 0; transition: opacity 0.2s; cursor: pointer;
+    z-index: 20;
+  }
+  .canvas-module:hover .upload-overlay { opacity: 1; }
+
+  /* Image + Text */
+  .mod-img-text {
+    display: flex;
+    min-height: 240px;
+  }
+  .mod-img-text .img-slot {
+    width: 50%;
+    background: var(--amz-light);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    min-height: 240px;
+  }
+  .mod-img-text .img-slot img { width: 100%; height: 100%; object-fit: cover; }
+  .mod-img-text .img-slot .img-placeholder { font-size: 36px; color: #ccc; }
+  .mod-img-text .text-slot {
+    flex: 1;
+    padding: 30px 36px;
+    display: flex; flex-direction: column; justify-content: center;
+    background: white;
+  }
+  .mod-img-text .text-slot h3 { font-family: 'Playfair Display', serif; font-size: 22px; margin-bottom: 10px; color: var(--vinamit-green); }
+  .mod-img-text .text-slot p { font-size: 14px; line-height: 1.7; color: #444; }
+  .mod-img-text.reverse { flex-direction: row-reverse; }
+
+  /* 3-col Feature */
+  .mod-3col {
+    display: flex;
+    background: #fafafa;
+  }
+  .mod-3col .col {
+    flex: 1;
+    border-right: 1px solid #eee;
+    display: flex; flex-direction: column;
+  }
+  .mod-3col .col:last-child { border-right: none; }
+  .mod-3col .col .col-img {
+    height: 180px;
+    background: var(--amz-light);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; cursor: pointer;
+    position: relative;
+  }
+  .mod-3col .col .col-img img { width: 100%; height: 100%; object-fit: cover; }
+  .mod-3col .col .col-img .img-placeholder { font-size: 28px; color: #ccc; }
+  .mod-3col .col .col-text {
+    padding: 18px 20px;
+    flex: 1;
+    background: white;
+  }
+  .mod-3col .col .col-text h4 { font-size: 14px; font-weight: 900; margin-bottom: 6px; color: var(--vinamit-green); }
+  .mod-3col .col .col-text p { font-size: 12px; line-height: 1.6; color: #555; }
+
+  /* Premium Hero */
+  .mod-premium-hero {
+    width: 100%;
+    height: 380px;
+    position: relative;
+    overflow: hidden;
+    background: #1a1a1a;
+    cursor: pointer;
+    display: flex; align-items: center;
+  }
+  .mod-premium-hero .hero-img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    opacity: 0.7;
+  }
+  .mod-premium-hero .hero-content {
+    position: relative; z-index: 2;
+    padding: 0 60px;
+    color: white;
+  }
+  .mod-premium-hero .hero-eyebrow {
+    font-size: 11px; font-weight: 900; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--vinamit-yellow);
+    margin-bottom: 10px;
+  }
+  .mod-premium-hero .hero-content h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 48px; line-height: 1.1; margin-bottom: 16px;
+  }
+  .mod-premium-hero .hero-content p { font-size: 15px; opacity: 0.85; max-width: 380px; line-height: 1.6; }
+  .mod-premium-hero .hero-badge {
+    position: absolute; bottom: 20px; right: 30px; z-index: 3;
+    background: var(--vinamit-yellow);
+    color: #000;
+    font-size: 11px; font-weight: 900;
+    padding: 8px 16px; border-radius: 20px;
+    letter-spacing: 0.5px;
+  }
+
+  /* Comparison Table */
+  .mod-comparison {
+    padding: 30px 40px;
+    background: white;
+  }
+  .mod-comparison h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px; margin-bottom: 20px; text-align: center;
+    color: var(--vinamit-green);
+  }
+  .cmp-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .cmp-table th {
+    background: var(--vinamit-green);
+    color: white; padding: 10px 14px;
+    text-align: center; font-weight: 800;
+  }
+  .cmp-table th:first-child { text-align: left; }
+  .cmp-table td { padding: 9px 14px; border-bottom: 1px solid #eee; text-align: center; }
+  .cmp-table td:first-child { font-weight: 700; text-align: left; }
+  .cmp-table tr:nth-child(even) { background: #f9f9f9; }
+  .check { color: var(--green); font-size: 16px; }
+  .cross { color: #c00; font-size: 14px; }
+
+  /* Q&A */
+  .mod-qa {
+    padding: 30px 40px;
+    background: #fffef5;
+    border-top: 3px solid var(--vinamit-yellow);
+  }
+  .mod-qa h3 { font-family: 'Playfair Display', serif; font-size: 20px; margin-bottom: 20px; color: var(--vinamit-green); }
+  .qa-item { margin-bottom: 16px; }
+  .qa-q { font-weight: 800; font-size: 13px; color: var(--amz-blue); margin-bottom: 5px; }
+  .qa-q::before { content: "Q: "; }
+  .qa-a { font-size: 13px; color: #444; line-height: 1.6; padding-left: 16px; }
+  .qa-a::before { content: "A: "; font-weight: 700; }
+
+  /* Brand Store Header */
+  .mod-store-header {
+    background: var(--vinamit-green);
+    height: 140px;
+    display: flex; align-items: center;
+    padding: 0 40px;
+    gap: 20px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  .mod-store-header .store-bg {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover; opacity: 0.3;
+  }
+  .mod-store-header .store-logo-box {
+    width: 80px; height: 80px;
+    background: white; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; z-index: 2;
+    overflow: hidden; cursor: pointer;
+    flex-shrink: 0;
+  }
+  .mod-store-header .store-logo-box img { width: 100%; height: 100%; object-fit: contain; }
+  .mod-store-header .store-info { position: relative; z-index: 2; color: white; }
+  .mod-store-header .store-info h2 { font-family: 'Playfair Display', serif; font-size: 32px; }
+  .mod-store-header .store-info p { font-size: 13px; opacity: 0.85; }
+  .store-nav {
+    background: #1a3d1a;
+    padding: 0 40px;
+    display: flex; gap: 0;
+    overflow-x: auto;
+    flex-shrink: 0;
+  }
+  .store-nav a {
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 12px 18px;
+    white-space: nowrap;
+    border-bottom: 3px solid transparent;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .store-nav a:hover, .store-nav a.active {
+    color: white; border-bottom-color: var(--vinamit-yellow);
+  }
+
+  /* Product Grid (store) */
+  .mod-product-grid {
+    padding: 24px 32px;
+    background: #f7f7f7;
+  }
+  .mod-product-grid h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px; margin-bottom: 18px;
+    color: var(--vinamit-green);
+  }
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+  .product-card {
+    background: white;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #e0e0e0;
+    cursor: pointer;
+    transition: box-shadow 0.15s;
+    position: relative;
+  }
+  .product-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+  .product-card .pc-img {
+    height: 140px;
+    background: var(--amz-light);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; position: relative;
+  }
+  .product-card .pc-img img { width: 100%; height: 100%; object-fit: contain; padding: 8px; }
+  .product-card .pc-img .img-placeholder { font-size: 28px; color: #ccc; }
+  .product-card .pc-body { padding: 10px; }
+  .product-card .pc-title { font-size: 12px; font-weight: 700; line-height: 1.4; margin-bottom: 4px; color: var(--amz-blue); }
+  .product-card .pc-price { font-size: 14px; font-weight: 900; color: #B12704; }
+  .product-card .pc-rating { font-size: 11px; color: var(--amz-orange); margin-bottom: 2px; }
+
+  /* Listing Images strip */
+  .mod-listing-images {
+    padding: 20px 32px;
+    background: white;
+  }
+  .mod-listing-images h3 {
+    font-size: 14px; font-weight: 900; color: #888;
+    text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 14px;
+  }
+  .listing-images-strip {
+    display: flex; gap: 10px; overflow-x: auto;
+    padding-bottom: 6px;
+  }
+  .listing-img-thumb {
+    width: 100px; height: 100px;
+    border: 2px solid var(--border);
+    border-radius: 5px;
+    background: var(--amz-light);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; cursor: pointer;
+    position: relative; flex-shrink: 0;
+    transition: border-color 0.15s;
+  }
+  .listing-img-thumb:hover { border-color: var(--amz-orange); }
+  .listing-img-thumb img { width: 100%; height: 100%; object-fit: contain; padding: 4px; }
+  .listing-img-thumb .img-placeholder { font-size: 22px; color: #ccc; }
+  .listing-img-thumb .img-num {
+    position: absolute; bottom: 2px; right: 4px;
+    font-size: 9px; font-weight: 900; color: #aaa;
+  }
+  .add-img-thumb {
+    width: 100px; height: 100px;
+    border: 2px dashed var(--amz-orange);
+    border-radius: 5px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0;
+    color: var(--amz-orange);
+    font-size: 22px;
+    gap: 4px;
+    background: #fff8ee;
+    transition: background 0.15s;
+  }
+  .add-img-thumb:hover { background: #fff0cc; }
+  .add-img-thumb span { font-size: 10px; font-weight: 700; }
+
+  /* Spec module */
+  .mod-specs {
+    padding: 30px 40px;
+    background: white;
+    display: flex; gap: 40px;
+  }
+  .mod-specs .specs-img {
+    width: 260px; height: 200px;
+    background: var(--amz-light);
+    border-radius: 6px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; cursor: pointer; position: relative;
+  }
+  .mod-specs .specs-img img { width: 100%; height: 100%; object-fit: cover; }
+  .mod-specs .specs-img .img-placeholder { font-size: 36px; color: #ccc; }
+  .mod-specs table { flex: 1; border-collapse: collapse; font-size: 13px; align-self: flex-start; }
+  .mod-specs table th {
+    background: var(--amz-light);
+    padding: 8px 12px; text-align: left;
+    font-weight: 800; color: #555;
+    font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase;
+  }
+  .mod-specs table td { padding: 8px 12px; border-bottom: 1px solid #eee; }
+  .mod-specs table td:first-child { font-weight: 700; width: 40%; color: #333; }
+
+  /* Empty canvas state */
+  .empty-canvas {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 60px 20px;
+    color: #aaa;
+    text-align: center;
+  }
+  .empty-canvas .empty-icon { font-size: 48px; margin-bottom: 14px; }
+  .empty-canvas h3 { font-size: 16px; font-weight: 900; margin-bottom: 6px; color: #888; }
+  .empty-canvas p { font-size: 13px; }
+
+  /* ===== RIGHT PANEL ===== */
+  .right-panel {
+    width: 260px;
+    min-width: 220px;
+    background: white;
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .prop-editor {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px;
+  }
+  .prop-group { margin-bottom: 16px; }
+  .prop-label {
+    font-size: 10px; font-weight: 900; color: #888;
+    text-transform: uppercase; letter-spacing: 0.8px;
+    margin-bottom: 6px; display: block;
+  }
+  .prop-input {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: 4px;
+    padding: 6px 9px;
+    font-size: 12px;
+    font-family: 'Nunito', sans-serif;
+    color: #111;
+    transition: border-color 0.15s;
+    background: white;
+  }
+  .prop-input:focus { outline: none; border-color: var(--amz-orange); }
+  .prop-textarea {
+    resize: vertical; min-height: 70px;
+  }
+  .prop-upload-btn {
+    width: 100%;
+    padding: 7px;
+    background: var(--amz-light);
+    border: 1.5px dashed #aaa;
+    border-radius: 4px;
+    font-size: 12px; font-weight: 700;
+    color: #555;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .prop-upload-btn:hover { background: #fff3d4; border-color: var(--amz-orange); color: #333; }
+  .prop-update-btn {
+    width: 100%;
+    padding: 8px;
+    background: var(--amz-orange);
+    border: none; border-radius: 4px;
+    font-size: 13px; font-weight: 900;
+    color: #000;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    transition: all 0.15s;
+    margin-top: 4px;
+  }
+  .prop-update-btn:hover { background: #e68900; }
+
+  .spec-table-row { display: flex; gap: 6px; margin-bottom: 5px; }
+  .spec-table-row input { flex: 1; }
+
+  .no-selection {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    height: 100%; text-align: center;
+    color: #bbb; padding: 20px;
+  }
+  .no-selection .icon { font-size: 36px; margin-bottom: 10px; }
+  .no-selection p { font-size: 12px; }
+
+  /* Size badge on modules */
+  .size-badge {
+    position: absolute;
+    bottom: 4px; left: 50%; transform: translateX(-50%);
+    background: rgba(0,0,0,0.65);
+    color: white; font-size: 9px; font-weight: 800;
+    padding: 2px 8px; border-radius: 3px;
+    white-space: nowrap; z-index: 10;
+    opacity: 0; transition: opacity 0.15s;
+    pointer-events: none;
+  }
+  .canvas-module:hover .size-badge { opacity: 1; }
+
+  /* Mobile-specific styles */
+  .mobile-content .mod-full-banner { height: 180px; }
+  .mobile-content .mod-full-banner .banner-content { padding: 0 20px; }
+  .mobile-content .mod-full-banner .banner-content h2 { font-size: 20px; }
+  .mobile-content .mod-full-banner .banner-content p { font-size: 12px; }
+  .mobile-content .mod-brand-story { padding: 20px; flex-direction: column; }
+  .mobile-content .mod-brand-story .brand-img-slot { width: 100%; height: 120px; }
+  .mobile-content .mod-img-text { flex-direction: column; }
+  .mobile-content .mod-img-text .img-slot { width: 100%; height: 160px; min-height: 160px; }
+  .mobile-content .mod-img-text.reverse { flex-direction: column; }
+  .mobile-content .mod-3col { flex-direction: column; }
+  .mobile-content .mod-3col .col { border-right: none; border-bottom: 1px solid #eee; }
+  .mobile-content .mod-premium-hero { height: 240px; }
+  .mobile-content .mod-premium-hero .hero-content h1 { font-size: 28px; }
+  .mobile-content .mod-premium-hero .hero-content { padding: 0 24px; }
+  .mobile-content .product-grid { grid-template-columns: repeat(2, 1fr); }
+  .mobile-content .mod-comparison { padding: 16px; overflow-x: auto; }
+  .mobile-content .mod-specs { flex-direction: column; }
+  .mobile-content .mod-specs .specs-img { width: 100%; }
+  .mobile-content .listing-top { flex-direction: column; }
+  .mobile-content .listing-img-box { width: 100%; height: 200px; }
+  .mobile-content .mod-store-header { padding: 0 16px; }
+  .mobile-content .mod-store-header .store-info h2 { font-size: 22px; }
+  .mobile-content .store-nav { padding: 0 8px; }
+  .mobile-content .mod-product-grid { padding: 16px; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: #f0f0f0; }
+  ::-webkit-scrollbar-thumb { background: #bbb; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #888; }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 20px; right: 20px;
+    background: #131921; color: white;
+    padding: 10px 18px; border-radius: 6px;
+    font-size: 12px; font-weight: 700;
+    z-index: 1000; transform: translateY(60px);
+    transition: transform 0.3s ease;
+    border-left: 3px solid var(--amz-orange);
+  }
+  .toast.show { transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-logo">amazon <span>seller central simulator</span></div>
+  <div class="topbar-tabs">
+    <button class="tab-btn active" onclick="switchMode('brand-store')">🏪 Brand Store</button>
+    <button class="tab-btn" onclick="switchMode('a-plus-basic')">📄 A+ Basic</button>
+    <button class="tab-btn" onclick="switchMode('a-plus-premium')">⭐ A+ Premium</button>
+    <button class="tab-btn" onclick="switchMode('brand-story')">📖 Brand Story</button>
+    <button class="tab-btn" onclick="switchMode('listing-images')">🖼 Listing Images</button>
+  </div>
+</div>
+
+<div class="main-layout">
+
+  <!-- LEFT: Module Library -->
+  <div class="left-panel">
+    <div class="panel-header">📦 Module Library</div>
+    <div class="module-library" id="moduleLibrary">
+      <!-- injected by JS -->
+    </div>
+  </div>
+
+  <!-- CENTER: Canvas -->
+  <div class="canvas-area">
+    <div class="canvas-toolbar">
+      <div class="view-toggle">
+        <button class="view-btn active" id="btnBoth" onclick="setView('both')">⊞ Both</button>
+        <button class="view-btn" id="btnDesktop" onclick="setView('desktop')">🖥 Desktop</button>
+        <button class="view-btn" id="btnMobile" onclick="setView('mobile')">📱 Mobile</button>
+      </div>
+      <div class="toolbar-divider"></div>
+      <span class="toolbar-label" id="modeLabel">BRAND STORE</span>
+      <span class="canvas-hint">← Click module to add · Hover to edit</span>
+    </div>
+
+    <div class="preview-split" id="previewSplit">
+      <!-- Desktop -->
+      <div class="preview-desktop" id="previewDesktop">
+        <div class="preview-label">🖥 DESKTOP</div>
+        <div class="amz-header">
+          <div class="amz-logo">amazon</div>
+          <input class="amz-search" value="vinamit dried mango" readonly>
+          <span class="amz-cart">🛒</span>
+        </div>
+        <div class="amz-breadcrumb">Grocery › Snacks › Dried Fruit › Vinamit</div>
+        <div class="canvas-modules" id="canvasDesktop">
+          <div class="empty-canvas">
+            <div class="empty-icon">🏗️</div>
+            <h3>Canvas is empty</h3>
+            <p>Click <strong>+</strong> on any module in the left panel to add it here</p>
+          </div>
+        </div>
+      </div>
+      <!-- Mobile -->
+      <div class="preview-mobile-wrap" id="previewMobileWrap">
+        <div class="preview-label">📱 MOBILE PREVIEW</div>
+        <div class="mobile-frame">
+          <div class="mobile-notch"><div class="mobile-notch-bar"></div></div>
+          <div class="mobile-content" id="canvasMobile">
+            <div class="empty-canvas" style="padding:30px 16px;">
+              <div class="empty-icon" style="font-size:32px">📱</div>
+              <h3 style="font-size:13px">Mobile preview</h3>
+              <p style="font-size:11px">Modules appear here automatically</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Properties -->
+  <div class="right-panel">
+    <div class="panel-header">⚙️ Properties</div>
+    <div class="prop-editor" id="propEditor">
+      <div class="no-selection">
+        <div class="icon">🖱️</div>
+        <p>Click on a module in the canvas to edit its properties</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Hidden file input -->
+<input type="file" id="fileInput" accept="image/*" style="display:none">
+
+<script>
+// ===== STATE =====
+let currentMode = 'brand-store';
+let modules = []; // {id, type, data, imageSlots}
+let selectedId = null;
+let pendingUpload = null; // {moduleId, slotKey}
+let nextId = 1;
+
+// ===== MODULE DEFINITIONS =====
+const MODULE_DEFS = {
+  'brand-store': [
+    { type: 'store-header', name: 'Store Header', icon: '🏪', dim: 'Full width × 140px', modes: ['brand-store'] },
+    { type: 'product-grid', name: 'Product Grid', icon: '🛍️', dim: '4-col grid', modes: ['brand-store'] },
+    { type: 'full-banner', name: 'Full Banner', icon: '🖼️', dim: '1464 × 600px', modes: ['brand-store','a-plus-basic','a-plus-premium'] },
+    { type: 'img-text-left', name: 'Image + Text (L)', icon: '◧', dim: '50/50 split', modes: ['brand-store','a-plus-basic','a-plus-premium'] },
+    { type: 'img-text-right', name: 'Image + Text (R)', icon: '◨', dim: '50/50 split', modes: ['brand-store','a-plus-basic','a-plus-premium'] },
+  ],
+  'a-plus-basic': [
+    { type: 'full-banner', name: 'Full Banner', icon: '🖼️', dim: '970 × 300px', modes: ['a-plus-basic'] },
+    { type: 'img-text-left', name: 'Image + Text (L)', icon: '◧', dim: '300 × 300px', modes: ['a-plus-basic'] },
+    { type: 'img-text-right', name: 'Image + Text (R)', icon: '◨', dim: '300 × 300px', modes: ['a-plus-basic'] },
+    { type: '3col', name: '3-Col Feature', icon: '⊞', dim: '300px each col', modes: ['a-plus-basic'] },
+    { type: 'comparison', name: 'Comparison Table', icon: '📊', dim: 'Full width', modes: ['a-plus-basic','a-plus-premium'] },
+    { type: 'qa', name: 'Q&A Module', icon: '❓', dim: 'Text only', modes: ['a-plus-basic','a-plus-premium'] },
+    { type: 'specs', name: 'Tech Specs', icon: '📋', dim: 'Full width', modes: ['a-plus-basic','a-plus-premium'] },
+  ],
+  'a-plus-premium': [
+    { type: 'premium-hero', name: 'Premium Hero', icon: '⭐', dim: '1464 × 600px', modes: ['a-plus-premium'] },
+    { type: 'full-banner', name: 'Full Banner', icon: '🖼️', dim: '1464 × 600px', modes: ['a-plus-premium'] },
+    { type: 'img-text-left', name: 'Image + Text (L)', icon: '◧', dim: 'Full width', modes: ['a-plus-premium'] },
+    { type: 'img-text-right', name: 'Image + Text (R)', icon: '◨', dim: 'Full width', modes: ['a-plus-premium'] },
+    { type: '3col', name: '3-Col Feature', icon: '⊞', dim: '488px × 3', modes: ['a-plus-premium'] },
+    { type: 'comparison', name: 'Comparison Table', icon: '📊', dim: 'Full width', modes: ['a-plus-premium'] },
+    { type: 'qa', name: 'Q&A Module', icon: '❓', dim: 'Text only', modes: ['a-plus-premium'] },
+    { type: 'specs', name: 'Tech Specs', icon: '📋', dim: 'Full width', modes: ['a-plus-premium'] },
+  ],
+  'brand-story': [
+    { type: 'brand-story', name: 'Brand Story Banner', icon: '📖', dim: 'Full width × 220px', modes: ['brand-story'] },
+    { type: 'img-text-left', name: 'Image + Text (L)', icon: '◧', dim: '300 × 300px', modes: ['brand-story'] },
+    { type: '3col', name: '3-Col Feature', icon: '⊞', dim: '300px each', modes: ['brand-story'] },
+  ],
+  'listing-images': [
+    { type: 'listing-images', name: 'Listing Images (7 slots)', icon: '🖼️', dim: '1000 × 1000px each', modes: ['listing-images'] },
+    { type: 'specs', name: 'Tech Specs', icon: '📋', dim: 'Full width', modes: ['listing-images'] },
+  ],
+};
+
+// Default data for each module type
+function defaultData(type) {
+  const d = {
+    'store-header': {
+      brandName: 'Vinamit Organic',
+      tagline: 'Premium Vietnamese Dried Fruit — Farm to Snack',
+      navItems: 'All Products, Dried Mango, Dried Jackfruit, Mixed Fruit, About Us',
+      bgImg: null, logoImg: null
+    },
+    'product-grid': {
+      title: 'Our Best Sellers',
+      products: [
+        { name: 'Soft Dried Mango 3.5oz', price: '$7.90', rating: '★★★★★', img: null },
+        { name: 'Dried Jackfruit Chips 8.8oz', price: '$12.99', rating: '★★★★½', img: null },
+        { name: 'Mixed Fruit Chips 8.8oz', price: '$13.50', rating: '★★★★★', img: null },
+        { name: 'Freeze-Dried Sugarcane 7oz', price: '$15.99', rating: '★★★★☆', img: null },
+      ]
+    },
+    'full-banner': {
+      heading: 'Pure Tropical Taste from Vietnam',
+      subtext: 'No preservatives. No artificial colors. Just real fruit.',
+      img: null
+    },
+    'img-text-left': {
+      heading: 'Grown in the Heart of Vietnam',
+      body: 'Our fruits are carefully selected from trusted farms across Vietnam's Mekong Delta. Slow-dried to preserve natural sweetness and nutrients.',
+      img: null
+    },
+    'img-text-right': {
+      heading: 'Clean Label Promise',
+      body: 'Every product is Non-GMO, Gluten-Free, and Vegan certified. Nothing artificial — ever.',
+      img: null
+    },
+    '3col': {
+      cols: [
+        { heading: '🌿 100% Natural', body: 'No preservatives, no artificial flavors. Pure fruit goodness in every bite.', img: null },
+        { heading: '🌏 Farm to Snack', body: 'Directly sourced from Vietnamese farms. Fresh, seasonal, sustainable.', img: null },
+        { heading: '🏆 Award-Winning', body: 'Recognized for quality and innovation in Southeast Asian food exports.', img: null },
+      ]
+    },
+    'premium-hero': {
+      eyebrow: 'Premium A+ Content',
+      heading: 'Experience Vietnam\'s Finest Tropical Fruits',
+      subtext: 'Handpicked, slow-dried, and packed with natural flavor. Discover what real fruit tastes like.',
+      badge: '🌟 Amazon\'s Choice',
+      img: null
+    },
+    'brand-story': {
+      heading: 'Our Story — From Mekong to Your Table',
+      body: 'Founded in Vietnam with a mission to share authentic tropical flavors with the world. Vinamit has been crafting premium dried fruits for over 30 years, using traditional recipes and modern food safety standards.',
+      img: null
+    },
+    'comparison': {
+      title: 'Why Choose Vinamit?',
+      rows: [
+        { feature: 'No Added Sugar', vinamit: '✓', generic: '✗' },
+        { feature: 'Non-GMO Certified', vinamit: '✓', generic: '✗' },
+        { feature: 'Gluten-Free', vinamit: '✓', generic: '✓' },
+        { feature: 'Vegan', vinamit: '✓', generic: '✓' },
+        { feature: 'No Artificial Color', vinamit: '✓', generic: '✗' },
+        { feature: 'Resealable Bag', vinamit: '✓', generic: '✗' },
+      ]
+    },
+    'qa': {
+      title: 'Customer Questions',
+      items: [
+        { q: 'Is there any added sugar?', a: 'No! Our products contain zero added sugar. Only the natural sweetness of the fruit.' },
+        { q: 'How long does it stay fresh after opening?', a: 'Once opened, store in a cool dry place. Best consumed within 30 days for optimal flavor.' },
+        { q: 'Are your products suitable for kids?', a: 'Absolutely. All our snacks are natural, preservative-free, and perfect for children.' },
+      ]
+    },
+    'specs': {
+      img: null,
+      rows: [
+        { label: 'Weight', value: '3.5 oz / 99g' },
+        { label: 'Serving Size', value: '30g (~1 oz)' },
+        { label: 'Servings Per Container', value: '3.3' },
+        { label: 'Calories per serving', value: '90 kcal' },
+        { label: 'Shelf Life', value: '12 months' },
+        { label: 'Storage', value: 'Cool, dry place' },
+      ]
+    },
+    'listing-images': {
+      slots: Array(7).fill(null)
+    },
+  };
+  return d[type] ? JSON.parse(JSON.stringify(d[type])) : {};
+}
+
+// ===== RENDER MODULE LIBRARY =====
+function renderLibrary() {
+  const lib = document.getElementById('moduleLibrary');
+  const defs = MODULE_DEFS[currentMode] || [];
+  lib.innerHTML = `<div class="module-section-title">${currentMode.replace(/-/g,' ').toUpperCase()} MODULES</div>`;
+  defs.forEach(def => {
+    lib.innerHTML += `
+      <div class="module-card" onclick="addModule('${def.type}')">
+        <div class="module-icon">${def.icon}</div>
+        <div class="module-info">
+          <div class="module-name">${def.name}</div>
+          <div class="module-dim">${def.dim}</div>
+        </div>
+        <button class="add-btn" onclick="event.stopPropagation();addModule('${def.type}')">+</button>
+      </div>`;
+  });
+}
+
+// ===== ADD MODULE =====
+function addModule(type) {
+  const mod = { id: nextId++, type, data: defaultData(type) };
+  modules.push(mod);
+  renderCanvas();
+  selectModule(mod.id);
+  showToast('Module added ✓');
+}
+
+// ===== REMOVE MODULE =====
+function removeModule(id, e) {
+  e && e.stopPropagation();
+  modules = modules.filter(m => m.id !== id);
+  if (selectedId === id) { selectedId = null; renderProps(); }
+  renderCanvas();
+  showToast('Module removed');
+}
+
+function moveModule(id, dir, e) {
+  e && e.stopPropagation();
+  const idx = modules.findIndex(m => m.id === id);
+  if (dir === -1 && idx === 0) return;
+  if (dir === 1 && idx === modules.length - 1) return;
+  const tmp = modules[idx];
+  modules[idx] = modules[idx + dir];
+  modules[idx + dir] = tmp;
+  renderCanvas();
+}
+
+// ===== SELECT MODULE =====
+function selectModule(id) {
+  selectedId = id;
+  document.querySelectorAll('.canvas-module').forEach(el => el.classList.remove('selected'));
+  document.querySelectorAll(`[data-mod-id="${id}"]`).forEach(el => el.classList.add('selected'));
+  renderProps();
+}
+
+// ===== RENDER CANVAS =====
+function renderCanvas() {
+  const desktop = document.getElementById('canvasDesktop');
+  const mobile = document.getElementById('canvasMobile');
+
+  if (modules.length === 0) {
+    const empty = `<div class="empty-canvas"><div class="empty-icon">🏗️</div><h3>Canvas is empty</h3><p>Click <strong>+</strong> on any module in the left panel to add it here</p></div>`;
+    desktop.innerHTML = empty;
+    mobile.innerHTML = `<div class="empty-canvas" style="padding:30px 16px;"><div class="empty-icon" style="font-size:32px">📱</div><h3 style="font-size:13px">Mobile preview</h3><p style="font-size:11px">Modules appear here automatically</p></div>`;
+    return;
+  }
+
+  // Listing chrome for listing-images mode
+  let listingChrome = '';
+  if (currentMode === 'listing-images') {
+    listingChrome = `
+      <div class="listing-top">
+        <div class="listing-img-box" onclick="triggerUpload(-1, 'mainImg')">
+          ${modules.find(m=>m.type==='listing-images')?.data?.slots?.[0] ? `<img src="${modules.find(m=>m.type==='listing-images').data.slots[0]}">` : `<div class="listing-img-placeholder">📦</div>`}
+          <div class="listing-img-upload-hint">📁 Click to upload main image</div>
+        </div>
+        <div class="listing-info">
+          <div class="listing-brand">Visit the Vinamit Store</div>
+          <div class="listing-title">Vinamit Soft Dried Mango Slices | Premium Vietnamese Cat Chu Variety | No Sugar Added | 3.5oz Bag</div>
+          <div class="listing-rating"><span class="stars">★★★★★</span> <span style="color:var(--amz-blue);font-size:12px">4.8 (1,247 ratings)</span></div>
+          <div class="listing-price">$7.90</div>
+          <div class="listing-prime">🔵 FREE delivery</div>
+          <button class="buy-btn">Buy Now</button>
+          <button class="cart-btn">Add to Cart</button>
+        </div>
+      </div>`;
+  }
+
+  desktop.innerHTML = listingChrome + modules.map(m => renderModuleHTML(m, false)).join('');
+  mobile.innerHTML = listingChrome + modules.map(m => renderModuleHTML(m, true)).join('');
+
+  // Re-attach selection
+  if (selectedId) {
+    document.querySelectorAll(`[data-mod-id="${selectedId}"]`).forEach(el => el.classList.add('selected'));
+  }
+}
+
+// ===== RENDER INDIVIDUAL MODULE =====
+function renderModuleHTML(mod, isMobile) {
+  const { id, type, data } = mod;
+  let inner = '';
+
+  const imgSrc = (url, ph) => url ? `<img src="${url}" alt="">` : `<div class="img-placeholder">${ph}</div>`;
+  const canvasAttr = isMobile ? '' : `data-mod-id="${id}" onclick="selectModule(${id})"`;
+
+  switch (type) {
+    case 'store-header':
+      const navItems = (data.navItems || '').split(',').map(s => s.trim()).filter(Boolean);
+      inner = `
+        <div class="mod-store-header" ${isMobile ? '' : `onclick="triggerUpload(${id},'bgImg')"`}>
+          ${data.bgImg ? `<img class="store-bg" src="${data.bgImg}">` : ''}
+          <div class="store-logo-box" onclick="${isMobile ? '' : `event.stopPropagation();triggerUpload(${id},'logoImg')`}">${imgSrc(data.logoImg,'🌿')}</div>
+          <div class="store-info"><h2>${data.brandName||'Vinamit Organic'}</h2><p>${data.tagline||''}</p></div>
+          ${!isMobile ? `<div class="upload-overlay">📁 Click to change background</div>` : ''}
+        </div>
+        <div class="store-nav">
+          ${navItems.map((n,i) => `<a class="${i===0?'active':''}" href="#">${n}</a>`).join('')}
+        </div>`;
+      break;
+
+    case 'product-grid':
+      const prods = data.products || [];
+      inner = `<div class="mod-product-grid">
+        <h3>${data.title||'Our Products'}</h3>
+        <div class="product-grid">
+          ${prods.map((p,i) => `
+            <div class="product-card" onclick="${isMobile?'':`triggerUpload(${id},'prod_${i}')`}">
+              <div class="pc-img">${p.img ? `<img src="${p.img}">` : `<div class="img-placeholder">📦</div>`}</div>
+              <div class="pc-body">
+                <div class="pc-rating">${p.rating}</div>
+                <div class="pc-title">${p.name}</div>
+                <div class="pc-price">${p.price}</div>
+              </div>
+            </div>`).join('')}
+        </div>
+      </div>`;
+      break;
+
+    case 'full-banner':
+      inner = `<div class="mod-full-banner" ${isMobile?'':''}>
+        ${data.img ? `<img class="banner-img" src="${data.img}">` : ''}
+        <div class="banner-overlay"></div>
+        <div class="banner-content">
+          <h2>${data.heading||'Pure Tropical Taste'}</h2>
+          <p>${data.subtext||''}</p>
+        </div>
+        ${!isMobile ? `<div class="upload-overlay" onclick="event.stopPropagation();triggerUpload(${id},'img')">📁 Click to upload background image</div>
+        <div class="size-badge">Desktop: 1464×600px · Mobile: 600×450px</div>` : ''}
+      </div>`;
+      break;
+
+    case 'img-text-left':
+    case 'img-text-right':
+      const rev = type === 'img-text-right' ? ' reverse' : '';
+      inner = `<div class="mod-img-text${rev}">
+        <div class="img-slot" ${isMobile?'':` onclick="event.stopPropagation();triggerUpload(${id},'img')"`}>
+          ${imgSrc(data.img, '🌿')}
+          ${!isMobile?`<div class="upload-overlay">📁 Upload Image</div><div class="size-badge">300×300px</div>`:''}
+        </div>
+        <div class="text-slot">
+          <h3>${data.heading||'Feature Heading'}</h3>
+          <p>${data.body||'Description text here'}</p>
+        </div>
+      </div>`;
+      break;
+
+    case '3col':
+      const cols = data.cols || [];
+      inner = `<div class="mod-3col">
+        ${cols.map((c,i) => `
+          <div class="col">
+            <div class="col-img" ${isMobile?'':` onclick="event.stopPropagation();triggerUpload(${id},'col_${i}')"`}>
+              ${c.img ? `<img src="${c.img}">` : `<div class="img-placeholder">🌿</div>`}
+              ${!isMobile?`<div class="upload-overlay">📁</div><div class="size-badge">300×300px</div>`:''}
+            </div>
+            <div class="col-text"><h4>${c.heading}</h4><p>${c.body}</p></div>
+          </div>`).join('')}
+      </div>`;
+      break;
+
+    case 'premium-hero':
+      inner = `<div class="mod-premium-hero">
+        ${data.img ? `<img class="hero-img" src="${data.img}">` : ''}
+        <div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,0.6),transparent);pointer-events:none"></div>
+        <div class="hero-content">
+          <div class="hero-eyebrow">${data.eyebrow||'Premium'}</div>
+          <h1>${data.heading||'Hero Heading'}</h1>
+          <p>${data.subtext||''}</p>
+        </div>
+        ${data.badge?`<div class="hero-badge">${data.badge}</div>`:''}
+        ${!isMobile?`<div class="upload-overlay" onclick="event.stopPropagation();triggerUpload(${id},'img')">📁 Upload hero background (1464×600px)</div>`:''}
+      </div>`;
+      break;
+
+    case 'brand-story':
+      inner = `<div class="mod-brand-story">
+        <div class="brand-text">
+          <h2>${data.heading||'Our Story'}</h2>
+          <p>${data.body||''}</p>
+        </div>
+        <div class="brand-img-slot" ${isMobile?'':` onclick="event.stopPropagation();triggerUpload(${id},'img')"`}>
+          ${imgSrc(data.img, '🌿')}
+          ${!isMobile?`<div class="upload-overlay" style="border-radius:8px">📁 Upload</div>`:''}
+        </div>
+      </div>`;
+      break;
+
+    case 'comparison':
+      const rows = data.rows || [];
+      inner = `<div class="mod-comparison">
+        <h3>${data.title||'Why Choose Us?'}</h3>
+        <table class="cmp-table">
+          <thead><tr><th>Feature</th><th>Vinamit</th><th>Generic Brand</th></tr></thead>
+          <tbody>${rows.map(r=>`<tr>
+            <td>${r.feature}</td>
+            <td>${r.vinamit==='✓'?'<span class="check">✓</span>':'<span class="cross">✗</span>'}</td>
+            <td>${r.generic==='✓'?'<span class="check">✓</span>':'<span class="cross">✗</span>'}</td>
+          </tr>`).join('')}</tbody>
+        </table>
+      </div>`;
+      break;
+
+    case 'qa':
+      inner = `<div class="mod-qa">
+        <h3>${data.title||'Q&A'}</h3>
+        ${(data.items||[]).map(item=>`
+          <div class="qa-item">
+            <div class="qa-q">${item.q}</div>
+            <div class="qa-a">${item.a}</div>
+          </div>`).join('')}
+      </div>`;
+      break;
+
+    case 'specs':
+      const specRows = data.rows || [];
+      inner = `<div class="mod-specs">
+        <div class="specs-img" ${isMobile?'':` onclick="event.stopPropagation();triggerUpload(${id},'img')"`}>
+          ${imgSrc(data.img, '📦')}
+          ${!isMobile?`<div class="upload-overlay">📁 Upload</div>`:''}
+        </div>
+        <table>
+          <thead><tr><th>Specification</th><th>Details</th></tr></thead>
+          <tbody>${specRows.map(r=>`<tr><td>${r.label}</td><td>${r.value}</td></tr>`).join('')}</tbody>
+        </table>
+      </div>`;
+      break;
+
+    case 'listing-images':
+      const slots = data.slots || Array(7).fill(null);
+      inner = `<div class="mod-listing-images">
+        <h3>📷 Product Images (${slots.filter(Boolean).length}/7 uploaded)</h3>
+        <div class="listing-images-strip">
+          ${slots.map((s,i)=>`
+            <div class="listing-img-thumb" ${isMobile?'':` onclick="event.stopPropagation();triggerUpload(${id},'slot_${i}')" title="Image ${i+1}: ${i===0?'Main (required)':i===1?'Back':'Alt view'} — 1000×1000px"`}>
+              ${s ? `<img src="${s}">` : `<div class="img-placeholder">📷</div>`}
+              <div class="img-num">${i+1}</div>
+              ${!isMobile?`<div class="upload-overlay" style="border-radius:5px;font-size:10px">📁 Upload</div>`:''}
+            </div>`).join('')}
+          ${!isMobile?`<div class="add-img-thumb" onclick="event.stopPropagation();triggerUpload(${id},'slot_extra')"><span>+</span><span>Add</span></div>`:''}
+        </div>
+      </div>`;
+      break;
+  }
+
+  if (!inner) return '';
+
+  if (isMobile) {
+    return inner;
+  }
+
+  const typeName = type.replace(/-/g,' ').toUpperCase();
+  return `<div class="canvas-module" data-mod-id="${id}" onclick="selectModule(${id})">
+    <div class="module-type-badge">${typeName}</div>
+    <div class="module-controls">
+      <button class="ctrl-btn ctrl-up" onclick="moveModule(${id},-1,event)" title="Move up">▲</button>
+      <button class="ctrl-btn ctrl-down" onclick="moveModule(${id},1,event)" title="Move down">▼</button>
+      <button class="ctrl-btn ctrl-del" onclick="removeModule(${id},event)" title="Delete">✕</button>
+    </div>
+    ${inner}
+  </div>`;
+}
+
+// ===== RENDER PROPS =====
+function renderProps() {
+  const panel = document.getElementById('propEditor');
+  if (!selectedId) {
+    panel.innerHTML = `<div class="no-selection"><div class="icon">🖱️</div><p>Click on a module in the canvas to edit its properties</p></div>`;
+    return;
+  }
+  const mod = modules.find(m => m.id === selectedId);
+  if (!mod) return;
+
+  const { type, data } = mod;
+  let html = `<div style="font-size:11px;font-weight:900;color:#888;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:12px;">${type.replace(/-/g,' ')}</div>`;
+
+  switch (type) {
+    case 'store-header':
+      html += propText('Brand Name', 'brandName', data.brandName);
+      html += propText('Tagline', 'tagline', data.tagline);
+      html += propText('Nav Items (comma sep)', 'navItems', data.navItems);
+      html += propImg('Background Image', 'bgImg', data.bgImg);
+      html += propImg('Logo', 'logoImg', data.logoImg);
+      break;
+    case 'full-banner':
+    case 'premium-hero':
+      if (type === 'premium-hero') html += propText('Eyebrow', 'eyebrow', data.eyebrow);
+      html += propText('Heading', 'heading', data.heading);
+      html += propTextarea('Subtext', 'subtext', data.subtext);
+      if (type === 'premium-hero') html += propText('Badge text', 'badge', data.badge);
+      html += propImg('Background Image', 'img', data.img);
+      break;
+    case 'img-text-left':
+    case 'img-text-right':
+      html += propText('Heading', 'heading', data.heading);
+      html += propTextarea('Body text', 'body', data.body);
+      html += propImg('Image (300×300px)', 'img', data.img);
+      break;
+    case 'brand-story':
+      html += propText('Heading', 'heading', data.heading);
+      html += propTextarea('Story text', 'body', data.body);
+      html += propImg('Image', 'img', data.img);
+      break;
+    case '3col':
+      (data.cols || []).forEach((col, i) => {
+        html += `<div style="border-top:1px solid #eee;padding-top:10px;margin-top:6px;"><div class="prop-label">Column ${i+1}</div></div>`;
+        html += propText(`Heading`, `cols[${i}].heading`, col.heading);
+        html += propTextarea(`Body`, `cols[${i}].body`, col.body);
+        html += propImg(`Image`, `cols[${i}].img`, col.img, i);
+      });
+      break;
+    case 'product-grid':
+      html += propText('Section Title', 'title', data.title);
+      (data.products || []).forEach((p,i) => {
+        html += `<div style="border-top:1px solid #eee;padding-top:8px;margin-top:6px;"><div class="prop-label">Product ${i+1}</div></div>`;
+        html += propText('Name', `products[${i}].name`, p.name);
+        html += propText('Price', `products[${i}].price`, p.price);
+        html += propImg('Product Image', `prod_${i}`, p.img, i);
+      });
+      break;
+    case 'comparison':
+      html += propText('Title', 'title', data.title);
+      (data.rows||[]).forEach((r,i) => {
+        html += `<div style="font-size:10px;font-weight:700;color:#aaa;margin-top:8px;">Row ${i+1}</div>`;
+        html += propText('Feature', `rows[${i}].feature`, r.feature);
+      });
+      break;
+    case 'qa':
+      html += propText('Section Title', 'title', data.title);
+      (data.items||[]).forEach((item,i) => {
+        html += `<div style="border-top:1px solid #eee;padding-top:8px;margin-top:6px;"><div class="prop-label">Q&A ${i+1}</div></div>`;
+        html += propText('Question', `items[${i}].q`, item.q);
+        html += propTextarea('Answer', `items[${i}].a`, item.a);
+      });
+      break;
+    case 'specs':
+      html += propImg('Product Image', 'img', data.img);
+      (data.rows||[]).forEach((r,i) => {
+        html += `<div class="spec-table-row">
+          <input class="prop-input" placeholder="Label" value="${r.label}" data-key="rows[${i}].label" onchange="updateProp(this)">
+          <input class="prop-input" placeholder="Value" value="${r.value}" data-key="rows[${i}].value" onchange="updateProp(this)">
+        </div>`;
+      });
+      break;
+    case 'listing-images':
+      html += `<div class="prop-label">Upload Images (slots 1-7)</div>`;
+      (data.slots||[]).forEach((s,i) => {
+        html += propImg(`Image ${i+1}${i===0?' (Main)':''}`, `slot_${i}`, s, i);
+      });
+      break;
+  }
+
+  html += `<button class="prop-update-btn" onclick="renderCanvas()">🔄 Apply Changes</button>`;
+  panel.innerHTML = html;
+}
+
+function propText(label, key, value) {
+  return `<div class="prop-group">
+    <label class="prop-label">${label}</label>
+    <input class="prop-input" value="${(value||'').replace(/"/g,'&quot;')}" data-key="${key}" onchange="updateProp(this)" oninput="updateProp(this)">
+  </div>`;
+}
+function propTextarea(label, key, value) {
+  return `<div class="prop-group">
+    <label class="prop-label">${label}</label>
+    <textarea class="prop-input prop-textarea" data-key="${key}" onchange="updateProp(this)" oninput="updateProp(this)">${value||''}</textarea>
+  </div>`;
+}
+function propImg(label, slotKey, value, idx) {
+  return `<div class="prop-group">
+    <label class="prop-label">${label}</label>
+    ${value ? `<img src="${value}" style="width:100%;height:70px;object-fit:cover;border-radius:4px;margin-bottom:6px;border:1px solid #ddd;">` : ''}
+    <button class="prop-upload-btn" onclick="triggerUpload(${selectedId},'${slotKey}')">📁 ${value ? 'Change Image' : 'Upload Image'}</button>
+  </div>`;
+}
+
+function updateProp(el) {
+  const mod = modules.find(m => m.id === selectedId);
+  if (!mod) return;
+  const key = el.dataset.key;
+  // support nested keys like cols[0].heading
+  const parts = key.replace(/\[(\d+)\]/g,'.$1').split('.');
+  let obj = mod.data;
+  for (let i = 0; i < parts.length - 1; i++) {
+    obj = obj[parts[i]];
+    if (!obj) return;
+  }
+  obj[parts[parts.length-1]] = el.value;
+  renderCanvas();
+}
+
+// ===== IMAGE UPLOAD =====
+function triggerUpload(modId, slotKey) {
+  pendingUpload = { modId, slotKey };
+  document.getElementById('fileInput').click();
+}
+
+document.getElementById('fileInput').addEventListener('change', function() {
+  if (!this.files[0] || !pendingUpload) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const { modId, slotKey } = pendingUpload;
+    const mod = modules.find(m => m.id === modId);
+    if (!mod) return;
+
+    const url = e.target.result;
+    // Handle nested slot keys
+    if (slotKey.startsWith('slot_')) {
+      const idx = parseInt(slotKey.replace('slot_',''));
+      if (mod.data.slots) mod.data.slots[idx] = url;
+    } else if (slotKey.startsWith('prod_')) {
+      const idx = parseInt(slotKey.replace('prod_',''));
+      if (mod.data.products?.[idx]) mod.data.products[idx].img = url;
+    } else if (slotKey.startsWith('col_')) {
+      const idx = parseInt(slotKey.replace('col_',''));
+      if (mod.data.cols?.[idx]) mod.data.cols[idx].img = url;
+    } else {
+      mod.data[slotKey] = url;
+    }
+
+    renderCanvas();
+    renderProps();
+    showToast('Image uploaded ✓');
+    pendingUpload = null;
+  };
+  reader.readAsDataURL(this.files[0]);
+  this.value = '';
+});
+
+// ===== VIEW TOGGLE =====
+function setView(mode) {
+  const desktop = document.getElementById('previewDesktop');
+  const mobileWrap = document.getElementById('previewMobileWrap');
+  document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('btn'+(mode==='both'?'Both':mode==='desktop'?'Desktop':'Mobile')).classList.add('active');
+  if (mode === 'both') { desktop.style.display='flex'; desktop.style.flexDirection='column'; mobileWrap.style.display='flex'; }
+  else if (mode === 'desktop') { desktop.style.display='flex'; desktop.style.flexDirection='column'; mobileWrap.style.display='none'; }
+  else { desktop.style.display='none'; mobileWrap.style.display='flex'; }
+}
+
+// ===== MODE SWITCH =====
+function switchMode(mode) {
+  currentMode = mode;
+  modules = [];
+  selectedId = null;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  const labels = { 'brand-store':'BRAND STORE', 'a-plus-basic':'A+ BASIC CONTENT', 'a-plus-premium':'A+ PREMIUM CONTENT', 'brand-story':'BRAND STORY', 'listing-images':'LISTING IMAGES' };
+  document.getElementById('modeLabel').textContent = labels[mode] || mode;
+  renderLibrary();
+  renderCanvas();
+  renderProps();
+}
+
+// ===== TOAST =====
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ===== INIT =====
+renderLibrary();
+renderCanvas();
+renderProps();
+</script>
+</body>
+</html>
